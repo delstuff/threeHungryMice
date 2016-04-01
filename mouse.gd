@@ -29,6 +29,8 @@ var aniPlayer = null
 var ani = ""
 var aniNew = ""
 
+var complete = false
+
 #var cheeseTaken = preload("res://cheeseTaken.scn")
 #var cheeseTakenCount = 0
 
@@ -75,7 +77,7 @@ func _fixed_process(delta):
 		highRot = false
 	oldRot = rot
 	
-	#animation&orientation
+	#orientation
 	#left-right
 	if leftRight == "right" and leftRightNext == "left" and death == false:
 		set_scale(get_scale() * Vector2(-1,get_scale().y))
@@ -93,7 +95,15 @@ func _fixed_process(delta):
 	else:
 		ani = "idle"
 	
-	
+	if score == 2600 and complete == false:
+		get_parent().get_node("hud/complete").show()
+		if Input.is_action_pressed("ui_accept"):
+			get_tree().reload_current_scene()
+		if Input.is_action_pressed("ui_cancel"):
+			Input.set_mouse_mode(Input.MOUSE_MODE_VISIBLE)
+			get_tree().change_scene("res://spash.scn")
+		set_angular_velocity(get_angular_velocity()*15)
+		complete = true
 	
 
 func _integrate_forces(state):
@@ -134,7 +144,7 @@ func _on_RigidBody2D_body_enter( body ):
 	if body.is_in_group("death"):
 		resetTimer += 1
 		set_linear_velocity(Vector2(0,0))
-		if death == false:
+		if death == false and complete == false:
 			get_parent().get_node("Camera2D/camShaker").play("death")
 			lives -= 1
 			get_node("sfx").play("no")
